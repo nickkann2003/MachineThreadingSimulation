@@ -11,4 +11,7 @@ public interface IMachine
 
     // Notify that output has a new availability
     public void NotifyOutput();
+
+    public void SetInputReference(IMachineInput input);
+    public void SetOutputReference(IMachineOutput output);
 }

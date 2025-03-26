@@ -3,16 +3,16 @@ using System.Threading;
 public class MachineBase : IMachine
 {
     // Basic machine references
-    private IMachineInput _input;
-    private IMachineOutput _output;
-    private IProcessable? currentItem;
+    protected IMachineInput connectedInput;
+    protected IMachineOutput connectedOutput;
+    protected IProcessable? currentItem;
 
     // Processing variables - used to avoid stalling
-    private bool busy;
-    private bool outputFull;
+    protected bool busy;
+    protected bool outputFull;
 
     // Threading variables - each processing function needs a thread
-    Thread t_Process;
+    protected Thread t_Process;
 
     // ------------ Constructors ------------
     public MachineBase()
@@ -31,7 +31,7 @@ public class MachineBase : IMachine
         if (currentItem == null)
         {
             // Try and grab one
-            currentItem = _input.GetNextInput();
+            currentItem = connectedInput.GetNextInput();
 
             // If successfully got one, Process
             if (currentItem != null)
@@ -63,9 +63,9 @@ public class MachineBase : IMachine
     /// <summary>
     /// Handles end of process vals
     /// </summary>
-    private void EndProcess()
+    protected void EndProcess()
     {
-        if (_output.GiveOutput(currentItem))
+        if (connectedOutput.GiveOutput(currentItem))
         {
             currentItem = null;
             busy = false;
@@ -75,6 +75,16 @@ public class MachineBase : IMachine
         {
             outputFull = true;
         }
+    }
+
+    public void SetInputReference(IMachineInput input)
+    {
+        this.connectedInput = input;
+    }
+
+    public void SetOutputReference(IMachineOutput output)
+    {
+        this.connectedOutput = output;
     }
 
     // ----------- IMachine Members -----------

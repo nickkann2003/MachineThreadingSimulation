@@ -5,4 +5,7 @@ public interface IMachineOutput
 
     // Give an item to this output, returns false if full
     public bool GiveOutput(IProcessable output);
+
+    public void SetInputReference(IMachineInput input);
+    public void SetMachineReference(IMachine machine);
 }

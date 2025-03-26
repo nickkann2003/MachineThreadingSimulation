@@ -51,6 +51,16 @@ public class MachineOutputBase : IMachineOutput
         }
     }
 
+    public void SetInputReference(IMachineInput input)
+    {
+        connectedInput = input;
+    }
+
+    public void SetMachineReference(IMachine machine)
+    {
+        connectedMachine = machine;
+    }
+
     // --------------- Public Functions --------------
     public void SetInputAndMachine(IMachineInput _input, IMachine _machine)
     {
