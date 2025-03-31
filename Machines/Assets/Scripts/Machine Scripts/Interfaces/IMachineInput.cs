@@ -8,4 +8,6 @@ public interface IMachineInput
 
     public void SetOutputReference(IMachineOutput output);
     public void SetMachineReference(IMachine machine);
+
+    public void Stop();
 }

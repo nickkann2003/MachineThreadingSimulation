@@ -46,6 +46,10 @@ public class GridManager : MonoBehaviour
         int adjustedY = (int)size.y / 2 + y;
         if ((adjustedX > 0 && adjustedX <= allMachines.Length) && (adjustedY > 0 && adjustedY <= allMachines[0].Length))
             allMachines[adjustedX][adjustedY] = con;
+
+        ConnectNeighbors(adjustedX, adjustedY); // Connect new machine to its neighbors
+
+        con.KickoffFunctionality(); // Kickoff functionality
     }
 
     /// <summary>
@@ -59,7 +63,7 @@ public class GridManager : MonoBehaviour
     {
         try
         {
-            return allMachines[(int)size.x / 2 + x - (int)direction.x][(int)size.y / 2 + y - (int)direction.y];
+            return allMachines[x + (int)direction.x][y + (int)direction.y];
         }
         catch
         {
@@ -78,7 +82,7 @@ public class GridManager : MonoBehaviour
     {
         try
         {
-            return allMachines[(int)size.x / 2 + x + (int)direction.x][(int)size.y / 2 + y + (int)direction.y];
+            return allMachines[x + (int)direction.x][y + (int)direction.y];
         }
         catch
         {
@@ -91,5 +95,26 @@ public class GridManager : MonoBehaviour
     {
         GameObject newGridSpot = Instantiate(emptyGridPrefab, transform);
         newGridSpot.transform.localPosition = new Vector3(x, 0, y);
+    }
+
+    /// <summary>
+    /// Connects a given position in the grid to its neighbors
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    private void ConnectNeighbors(int x, int y)
+    {
+        MachineVisualController? con = allMachines[x][y];
+
+        MachineVisualController? previousMachine = null;
+        MachineVisualController? nextMachine = null;
+
+        // Grab references to previous and next machine
+        // This is done by accessing spots in the grid based on the new machines location, its pointing direction, and the grid of machines
+        previousMachine = GetPrevious(x, y, con.inputDirection);
+        nextMachine = GetNext(x, y, con.outputDirection);
+
+        // Initialize the machine with the found neighbors
+        con.InitializeMachine(previousMachine, nextMachine);
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 public class MachineInputBase : IMachineInput
 {
     // Queue of items and storage info
-    private Queue<IProcessable> buffer;
+    private Queue<IProcessable> buffer =  new Queue<IProcessable>();
     private int bufferSize = 5;
 
     private IMachineOutput connectedOutput;
@@ -24,6 +24,16 @@ public class MachineInputBase : IMachineInput
         // If not full, return top item if exists
         if (buffer.Count > 0)
             return buffer.Dequeue();
+
+        // If empty, attempt an output pull
+        if(buffer.Count == 0)
+        {
+            PullFromOutput();
+            if(buffer.Count > 0)
+            {
+                return buffer.Dequeue();
+            }
+        }
 
         // Return null if empty
         return null;
@@ -61,6 +71,11 @@ public class MachineInputBase : IMachineInput
         this.connectedOutput = output;
     }
 
+    public void Stop()
+    {
+        // No threads in input to stop
+    }
+
     // ------------------ Public functions ---------------
     public void SetOutputAndMachine(IMachineOutput _output, IMachine _machine)
     {
@@ -71,10 +86,13 @@ public class MachineInputBase : IMachineInput
     // ------------------ Private functions ---------------
     private void PullFromOutput()
     {
-        IProcessable nextItem = connectedOutput.GetNextOutput();
-        if(nextItem != null)
+        if(connectedOutput != null)
         {
-            buffer.Enqueue(nextItem);
+            IProcessable nextItem = connectedOutput.GetNextOutput();
+            if(nextItem != null)
+            {
+                buffer.Enqueue(nextItem);
+            }
         }
     }
 }

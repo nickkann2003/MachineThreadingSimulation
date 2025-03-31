@@ -4,7 +4,7 @@ using UnityEngine;
 public class MachineOutputBase : IMachineOutput
 {
     // Queue of items and storage info
-    private Queue<IProcessable> buffer;
+    private Queue<IProcessable> buffer = new Queue<IProcessable>();
     private int bufferSize = 5;
 
     private IMachine connectedMachine;
@@ -31,6 +31,11 @@ public class MachineOutputBase : IMachineOutput
 
     public bool GiveOutput(IProcessable output)
     {
+        if (buffer.Contains(output))
+        {
+            return true;
+        }
+
         if (buffer.Count < bufferSize)
         {
             // If no items, perform add and notify machine
@@ -61,6 +66,11 @@ public class MachineOutputBase : IMachineOutput
         connectedMachine = machine;
     }
 
+    public void Stop()
+    {
+        // Machine output has no threads to stop
+    }
+
     // --------------- Public Functions --------------
     public void SetInputAndMachine(IMachineInput _input, IMachine _machine)
     {
@@ -71,7 +81,10 @@ public class MachineOutputBase : IMachineOutput
     // --------------- Private Functions --------------
     private void PushToInput()
     {
-        if (connectedInput.GiveInput(buffer.Peek()))
-            buffer.Dequeue();
+        if(connectedInput != null)
+        {
+            if (connectedInput.GiveInput(buffer.Peek()))
+                buffer.Dequeue();
+        }
     }
 }

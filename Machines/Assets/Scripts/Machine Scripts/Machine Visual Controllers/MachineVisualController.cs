@@ -7,7 +7,10 @@ public class MachineVisualController : MonoBehaviour
     [SerializeField] public IMachineOutput machineOutput;
 
     // Normalized direction vector, which way is this machine pointing
-    [SerializeField] public Vector2 direction;
+    [SerializeField] public Vector2 outputDirection;
+    [SerializeField] public Vector2 inputDirection;
+
+    [SerializeField] public SO_Machine machineSO;
 
     // -------------- Public Functions ----------------
     /// <summary>
@@ -17,9 +20,9 @@ public class MachineVisualController : MonoBehaviour
     /// <param name="nextMachineInput">Input for the next connected machine, NULL if not there</param>
     public void InitializeMachine(MachineVisualController previousMachineOutput, MachineVisualController nextMachineInput)
     {
-        machine = new MachineBase();
-        machineInput = new MachineInputBase();
-        machineOutput = new MachineOutputBase();
+        machine = MachineFactory.CreateMachine(machineSO.machineType);
+        machineInput = MachineFactory.CreateMachineInput(machineSO.machineInput);
+        machineOutput = MachineFactory.CreateMachineOutput(machineSO.machineOutput);
 
         // Connect internals
         ConnectMachine();
@@ -39,7 +42,7 @@ public class MachineVisualController : MonoBehaviour
     /// <param name="next">Input for the next connceted machine</param>
     public void ConnectToNextMachine(MachineVisualController next)
     {
-        if (next.direction.Equals(direction))
+        if (next.outputDirection.Equals(outputDirection))
         {
             machineOutput.SetInputReference(next.machineInput);     // Set this to push to next machine
             next.machineInput.SetOutputReference(machineOutput);    // Set next machine to pull from this
@@ -52,11 +55,19 @@ public class MachineVisualController : MonoBehaviour
     /// <param name="previous">Previous machine's output to connect</param>
     public void ConnectToPreviousMachine(MachineVisualController previous)
     {
-        if (previous.direction.Equals(direction))
+        if (previous.outputDirection.Equals(outputDirection))
         {
             machineInput.SetOutputReference(previous.machineOutput);    // Set this to pull from previous
             previous.machineOutput.SetInputReference(machineInput);     // Set previous to push to this
         }
+    }
+
+    /// <summary>
+    /// Calls notify input to kick off machine processing
+    /// </summary>
+    public void KickoffFunctionality()
+    {
+        machine.NotifyInput();
     }
 
     // -------------- Private Functions ----------------
@@ -66,5 +77,11 @@ public class MachineVisualController : MonoBehaviour
         machine.SetInputReference(machineInput);
         machineInput.SetMachineReference(machine);
         machineOutput.SetMachineReference(machine);
+    }
+
+    // -------------------- Unity Functions ---------------------
+    private void OnApplicationQuit()
+    {
+        
     }
 }

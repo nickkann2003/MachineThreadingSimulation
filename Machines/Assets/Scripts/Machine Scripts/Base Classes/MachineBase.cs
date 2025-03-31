@@ -1,4 +1,5 @@
 using System.Threading;
+using UnityEngine;
 
 public class MachineBase : IMachine
 {
@@ -35,7 +36,10 @@ public class MachineBase : IMachine
 
             // If successfully got one, Process
             if (currentItem != null)
+            {
+                Debug.Log("Starting MachineBase");
                 t_Process.Start();
+            }
         }
         else // Already had an item
         {
@@ -55,25 +59,34 @@ public class MachineBase : IMachine
         busy = true;
         for (int i = 0; i < 10; i++)
         {
+            Debug.Log("Base Machine Processing"); // DEBUG
             Thread.Sleep(100);
         }
-        EndProcess();
+        if (!EndProcess())
+        {
+            Thread.Sleep(Timeout.Infinite);
+        }
     }
 
     /// <summary>
     /// Handles end of process vals
     /// </summary>
-    protected void EndProcess()
+    protected bool EndProcess()
     {
         if (connectedOutput.GiveOutput(currentItem))
         {
+            Debug.Log("Output opening available, giving to output");
             currentItem = null;
             busy = false;
             outputFull = false;
+            t_Process.Join();
+            return true;
         }
         else
         {
+            Debug.Log("Output full, pausing thread and waiting");
             outputFull = true;
+            return false;
         }
     }
 
@@ -96,5 +109,10 @@ public class MachineBase : IMachine
     public virtual void NotifyOutput()
     {
         AwakeChecks();
+    }
+
+    public void Stop()
+    {
+        t_Process.Abort();
     }
 }

@@ -856,6 +856,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   machinePrefab: {fileID: 6197764780836875857, guid: 2381bd0cea132a94cb31017de09a2c2a, type: 3}
+  selectedMachine: {fileID: 11400000, guid: 355a983a30f31444b834f503b0ca785b, type: 2}
+  infiniteProducer: {fileID: 11400000, guid: eacf502beebb4a140bae348b02822580, type: 2}
   machineParentReference: {fileID: 583734173}
 --- !u!4 &1464086840
 Transform:

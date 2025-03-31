@@ -258,7 +258,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff260a093eb7eb147b774bce0a0089ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  direction: {x: 1, y: 0}
+  outputDirection: {x: 1, y: 0}
+  inputDirection: {x: -1, y: 0}
 --- !u!1 &8118127396732906477
 GameObject:
   m_ObjectHideFlags: 0
