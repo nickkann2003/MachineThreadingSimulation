@@ -10,6 +10,7 @@ public class MachineBase : IMachine
 
     // Processing variables - used to avoid stalling
     protected bool busy;
+    private bool done = false;
     protected bool outputFull;
 
     // Threading variables - each processing function needs a thread
@@ -79,13 +80,20 @@ public class MachineBase : IMachine
     /// </summary>
     protected bool EndProcess()
     {
+        if (done)
+            return true;
+
         if (connectedOutput.GiveOutput(currentItem))
         {
             Debug.Log("Output opening available, giving to output");
             currentItem = null;
             busy = false;
             outputFull = false;
+            done = true;
+            t_Process.Interrupt();
             t_Process.Join();
+            Debug.Log("Process successfully joined");
+            done = false;
             return true;
         }
         else

@@ -40,6 +40,10 @@ public class BarVisualController : MonoBehaviour
             progress = 0.99f;
         }
         int pAdjusted = Mathf.FloorToInt(progress * (progressSprites.Count));
+        if(pAdjusted == 0 && progress > 0)
+        {
+            pAdjusted += 1;
+        }
         display.sprite = progressSprites[pAdjusted];
     }
 }
