@@ -5,6 +5,8 @@ public class MachineVisualController : MonoBehaviour
     [SerializeField] private IMachine machine;
     [SerializeField] public IMachineInput machineInput;
     [SerializeField] public IMachineOutput machineOutput;
+    [SerializeField] public BarVisualController inputController;
+    [SerializeField] public BarVisualController outputController;
 
     // Normalized direction vector, which way is this machine pointing
     [SerializeField] public Vector2 outputDirection;
@@ -77,6 +79,9 @@ public class MachineVisualController : MonoBehaviour
         machine.SetInputReference(machineInput);
         machineInput.SetMachineReference(machine);
         machineOutput.SetMachineReference(machine);
+
+        machineInput.SetDisplayReference(inputController);
+        machineOutput.SetDisplayReference(outputController);
     }
 
     // -------------------- Unity Functions ---------------------

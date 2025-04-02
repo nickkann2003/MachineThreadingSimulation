@@ -9,34 +9,35 @@ public class MachineInputBase : IMachineInput
 
     private IMachineOutput connectedOutput;
     private IMachine connectedMachine;
+    private BarVisualController displayController;
 
     // -------------- IMachineInput members ----------------
     public IProcessable? GetNextInput()
     {
+        IProcessable returnedItem = null;
         // If full, dequeue and pull from output
-        if(buffer.Count >= bufferSize)
+        if (buffer.Count >= bufferSize)
         {
-            IProcessable returnedItem = buffer.Dequeue();
+            returnedItem = buffer.Dequeue();
             PullFromOutput();
-            return returnedItem;
         }
-        
-        // If not full, return top item if exists
-        if (buffer.Count > 0)
-            return buffer.Dequeue();
-
-        // If empty, attempt an output pull
-        if(buffer.Count == 0)
+        else if (buffer.Count > 0)
+        {
+            returnedItem = buffer.Dequeue();
+        } 
+        else if(buffer.Count == 0)
         {
             PullFromOutput();
             if(buffer.Count > 0)
             {
-                return buffer.Dequeue();
+                returnedItem = buffer.Dequeue();
             }
         }
 
+        UpdateVisual();
+
         // Return null if empty
-        return null;
+        return returnedItem;
     }
 
     public bool GiveInput(IProcessable input)
@@ -71,6 +72,11 @@ public class MachineInputBase : IMachineInput
         this.connectedOutput = output;
     }
 
+    public void SetDisplayReference(BarVisualController displayController)
+    {
+        this.displayController = displayController;
+    }
+
     public void Stop()
     {
         // No threads in input to stop
@@ -93,6 +99,14 @@ public class MachineInputBase : IMachineInput
             {
                 buffer.Enqueue(nextItem);
             }
+        }
+    }
+
+    private void UpdateVisual()
+    {
+        if(displayController != null)
+        {
+            displayController.SetProgress((float)buffer.Count / (float)bufferSize);
         }
     }
 }

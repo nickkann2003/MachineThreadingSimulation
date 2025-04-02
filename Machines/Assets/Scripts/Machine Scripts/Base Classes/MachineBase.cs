@@ -34,10 +34,16 @@ public class MachineBase : IMachine
             // Try and grab one
             currentItem = connectedInput.GetNextInput();
 
-            // If successfully got one, Process
+            // If successfully got one
             if (currentItem != null)
             {
-                Debug.Log("Starting MachineBase");
+                // If process reference is alive, its pointing to old process, Join and remake thread
+                if (t_Process.IsAlive)
+                {
+                    t_Process.Join();
+                    t_Process = new Thread(Process);
+                    t_Process.Start();
+                }
                 t_Process.Start();
             }
         }
@@ -57,15 +63,15 @@ public class MachineBase : IMachine
     protected virtual void Process()
     {
         busy = true;
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 3; i++)
         {
-            Debug.Log("Base Machine Processing"); // DEBUG
-            Thread.Sleep(100);
+            Thread.Sleep(200);
         }
-        if (!EndProcess())
+        while (!EndProcess())
         {
-            Thread.Sleep(Timeout.Infinite);
+            Thread.Sleep(4000);
         }
+        t_Process = new Thread(Process);
     }
 
     /// <summary>

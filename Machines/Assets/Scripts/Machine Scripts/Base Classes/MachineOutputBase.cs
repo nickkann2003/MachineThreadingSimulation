@@ -9,30 +9,34 @@ public class MachineOutputBase : IMachineOutput
 
     private IMachine connectedMachine;
     private IMachineInput connectedInput;
+    private BarVisualController displayController;
 
     // ----------------- IMachineOutput members --------------------
     public IProcessable GetNextOutput()
     {
+        IProcessable returnedItem = null;
         // If full, dequeue and notify machine
         if (buffer.Count >= bufferSize)
         {
-            IProcessable returnedItem = buffer.Dequeue();
+            returnedItem = buffer.Dequeue();
             connectedMachine.NotifyOutput();
-            return returnedItem;
+        } 
+        else if (buffer.Count > 0)
+        {
+            returnedItem = buffer.Dequeue();
         }
 
-        // If not full, return top item if exists
-        if (buffer.Count > 0)
-            return buffer.Dequeue();
+        UpdateVisual();
 
         // Return null if empty
-        return null;
+        return returnedItem;
     }
 
     public bool GiveOutput(IProcessable output)
     {
         if (buffer.Contains(output))
         {
+            UpdateVisual();
             return true;
         }
 
@@ -43,15 +47,18 @@ public class MachineOutputBase : IMachineOutput
             {
                 buffer.Enqueue(output);
                 PushToInput();
+                UpdateVisual();
                 return true;
             }
 
             // Perform add
             buffer.Enqueue(output);
+            UpdateVisual();
             return true;
         }
         else
         {
+            UpdateVisual();
             return false;
         }
     }
@@ -64,6 +71,11 @@ public class MachineOutputBase : IMachineOutput
     public void SetMachineReference(IMachine machine)
     {
         connectedMachine = machine;
+    }
+
+    public void SetDisplayReference(BarVisualController displayController)
+    {
+        this.displayController = displayController;
     }
 
     public void Stop()
@@ -87,4 +99,15 @@ public class MachineOutputBase : IMachineOutput
                 buffer.Dequeue();
         }
     }
+    
+    private void UpdateVisual()
+    {
+        if (displayController != null)
+        {
+            displayController.SetProgress((float)buffer.Count / (float)bufferSize);
+        }
+    }
+
+
+
 }

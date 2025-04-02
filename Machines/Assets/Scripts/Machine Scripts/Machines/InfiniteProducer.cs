@@ -16,6 +16,7 @@ public class InfiniteProducer : MachineBase
         {
             IProcessable createdItem = new ItemBase();
             connectedOutput.GiveOutput(createdItem);
+            Debug.Log("Created item");
             Thread.Sleep(4000);
         }
     }

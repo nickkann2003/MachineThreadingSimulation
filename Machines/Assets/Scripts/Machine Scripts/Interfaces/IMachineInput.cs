@@ -8,6 +8,7 @@ public interface IMachineInput
 
     public void SetOutputReference(IMachineOutput output);
     public void SetMachineReference(IMachine machine);
+    public void SetDisplayReference(BarVisualController displayController);
 
     public void Stop();
 }

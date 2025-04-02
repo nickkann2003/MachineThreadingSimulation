@@ -6,9 +6,21 @@ public class BarVisualController : MonoBehaviour
     [SerializeField] private SpriteRenderer display;
     [SerializeField] private List<Sprite> progressSprites;
 
+    float progress = 0f;
+    private bool update = false;
+
     private void Start()
     {
         SetProgress(0);
+    }
+
+    private void Update()
+    {
+        if (update)
+        {
+            performProgressUpdate();
+            update = false;
+        }
     }
 
     /// <summary>
@@ -17,7 +29,17 @@ public class BarVisualController : MonoBehaviour
     /// <param name="p">Float between 0 and 1 representing progress</param>
     public void SetProgress(float p)
     {
-        int pAdjusted = Mathf.FloorToInt(p * (progressSprites.Count));
+        update = true;
+        progress = p;
+    }
+
+    private void performProgressUpdate()
+    {
+        if(progress > 0.99f)
+        {
+            progress = 0.99f;
+        }
+        int pAdjusted = Mathf.FloorToInt(progress * (progressSprites.Count));
         display.sprite = progressSprites[pAdjusted];
     }
 }
