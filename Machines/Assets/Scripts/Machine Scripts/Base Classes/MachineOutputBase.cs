@@ -76,6 +76,7 @@ public class MachineOutputBase : IMachineOutput
     public void SetDisplayReference(BarVisualController displayController)
     {
         this.displayController = displayController;
+        UpdateVisual();
     }
 
     public void Stop()
@@ -95,8 +96,12 @@ public class MachineOutputBase : IMachineOutput
     {
         if(connectedInput != null)
         {
-            if (connectedInput.GiveInput(buffer.Peek()))
+            if (buffer.Count > 0 && connectedInput.GiveInput(buffer.Peek()))
+            {
                 buffer.Dequeue();
+                UpdateVisual();
+                PushToInput();
+            }
         }
     }
     
@@ -104,7 +109,7 @@ public class MachineOutputBase : IMachineOutput
     {
         if (displayController != null)
         {
-            displayController.SetProgress((float)buffer.Count / (float)bufferSize);
+            displayController.SetProgress((float)buffer.Count / (float)bufferSize, buffer.Count, bufferSize);
         }
     }
 

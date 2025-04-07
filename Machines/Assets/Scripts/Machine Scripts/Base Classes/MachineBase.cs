@@ -29,6 +29,18 @@ public class MachineBase : IMachine
     /// </summary>
     protected virtual void AwakeChecks()
     {
+        // Before performing awake checks, see if the previous process completed
+        // Once the process completes, a new Thread must be create for processing the next item
+        if (done)
+        {
+            if (t_Process.IsAlive)
+            {
+                t_Process.Join();
+            }
+            t_Process = new Thread(Process);
+            done = false;
+        }
+
         // If no current item
         if (currentItem == null)
         {
@@ -50,13 +62,16 @@ public class MachineBase : IMachine
         }
         else // Already had an item
         {
-            if (outputFull) // Output full, try to end process
-            {
-                EndProcess();
-            }
-            else if (!busy) // Output not full, not busy, have item, Start Process
+            if (!busy && !outputFull && !t_Process.IsAlive) // Output not full, not busy, have item, Start Process
             {
                 t_Process.Start();
+            }
+            else
+            {
+                if (GiveToOutput())
+                {
+                    AwakeChecks();
+                }
             }
         }
     }
@@ -68,37 +83,40 @@ public class MachineBase : IMachine
         {
             Thread.Sleep(200);
         }
-        while (!EndProcess())
-        {
-            Thread.Sleep(4000);
-        }
-        t_Process = new Thread(Process);
+        busy = false;
+        EndProcess();
     }
 
     /// <summary>
     /// Handles end of process vals
     /// </summary>
-    protected bool EndProcess()
+    protected void EndProcess()
     {
         if (done)
-            return true;
+            return;
 
-        if (connectedOutput.GiveOutput(currentItem))
+        GiveToOutput();
+    }
+
+    /// <summary>
+    /// Private function that handles the process of giving output to connected output
+    /// Sets necessary values and returns false if output is full
+    /// </summary>
+    private bool GiveToOutput()
+    {
+        if (currentItem == null || busy)
+            return false;
+
+        bool success = connectedOutput.GiveOutput(currentItem);
+        if (success)
         {
-            Debug.Log("Output opening available, giving to output");
             currentItem = null;
-            busy = false;
             outputFull = false;
             done = true;
-            t_Process.Interrupt();
-            t_Process.Join();
-            Debug.Log("Process successfully joined");
-            done = false;
             return true;
         }
         else
         {
-            Debug.Log("Output full, pausing thread and waiting");
             outputFull = true;
             return false;
         }

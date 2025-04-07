@@ -49,11 +49,13 @@ public class MachineInputBase : IMachineInput
             {
                 buffer.Enqueue(input);
                 connectedMachine.NotifyInput();
+                UpdateVisual();
                 return true;
             }
 
             // Perform add
             buffer.Enqueue(input);
+            UpdateVisual();
             return true;
         }
         else
@@ -75,6 +77,7 @@ public class MachineInputBase : IMachineInput
     public void SetDisplayReference(BarVisualController displayController)
     {
         this.displayController = displayController;
+        UpdateVisual();
     }
 
     public void Stop()
@@ -98,6 +101,8 @@ public class MachineInputBase : IMachineInput
             if(nextItem != null)
             {
                 buffer.Enqueue(nextItem);
+                UpdateVisual();
+                PullFromOutput();
             }
         }
     }
@@ -106,7 +111,7 @@ public class MachineInputBase : IMachineInput
     {
         if(displayController != null)
         {
-            displayController.SetProgress((float)buffer.Count / (float)bufferSize);
+            displayController.SetProgress((float)buffer.Count / (float)bufferSize, buffer.Count, bufferSize);
         }
     }
 }
