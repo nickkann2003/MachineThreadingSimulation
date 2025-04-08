@@ -14,6 +14,7 @@ public interface IMachine
 
     public void SetInputReference(IMachineInput input);
     public void SetOutputReference(IMachineOutput output);
+    public void SetDisplayReference(BarVisualController controller);
 
     public void Stop();
 }

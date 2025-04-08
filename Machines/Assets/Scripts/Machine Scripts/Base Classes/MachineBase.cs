@@ -7,6 +7,7 @@ public class MachineBase : IMachine
     protected IMachineInput connectedInput;
     protected IMachineOutput connectedOutput;
     protected IProcessable? currentItem;
+    protected BarVisualController visualController;
 
     // Processing variables - used to avoid stalling
     protected bool busy;
@@ -53,9 +54,10 @@ public class MachineBase : IMachine
                 // If process reference is alive, its pointing to old process, Join and remake thread
                 if (t_Process.IsAlive)
                 {
+                    Debug.Log("Machine process was alive, joining and then starting new proces");
                     t_Process.Join();
+                    Debug.Log("JOIN SUCCESS, starting new process");
                     t_Process = new Thread(Process);
-                    t_Process.Start();
                 }
                 t_Process.Start();
             }
@@ -66,11 +68,12 @@ public class MachineBase : IMachine
             {
                 t_Process.Start();
             }
-            else
+            else // Ouput was full, try giving to output again
             {
                 if (GiveToOutput())
                 {
-                    AwakeChecks();
+                    Thread t_awakeChecks = new Thread(AwakeChecks);
+                    t_awakeChecks.Start();
                 }
             }
         }
@@ -78,10 +81,13 @@ public class MachineBase : IMachine
 
     protected virtual void Process()
     {
+        int progress = 0;
         busy = true;
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 7; i++)
         {
-            Thread.Sleep(200);
+            Thread.Sleep(300);
+            progress++;
+            visualController.SetProgress((float)progress / 7f, 0, 1);
         }
         busy = false;
         EndProcess();
@@ -96,6 +102,7 @@ public class MachineBase : IMachine
             return;
 
         GiveToOutput();
+        visualController.SetProgress(currentItem == null ? 0 : 1, currentItem == null ? 0 : 1, 1);
     }
 
     /// <summary>
@@ -132,15 +139,22 @@ public class MachineBase : IMachine
         this.connectedOutput = output;
     }
 
+    public void SetDisplayReference(BarVisualController controller)
+    {
+        this.visualController = controller;
+    }
+
     // ----------- IMachine Members -----------
     public virtual void NotifyInput()
     {
-        AwakeChecks();
+        Thread t_awakeChecks = new Thread(AwakeChecks);
+        t_awakeChecks.Start();
     }
 
     public virtual void NotifyOutput()
     {
-        AwakeChecks();
+        Thread t_awakeChecks = new Thread(AwakeChecks);
+        t_awakeChecks.Start();
     }
 
     public void Stop()
