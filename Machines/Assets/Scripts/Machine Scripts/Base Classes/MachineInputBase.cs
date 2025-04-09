@@ -110,8 +110,8 @@ public class MachineInputBase : IMachineInput
     private void PerformEnqueue(IProcessable item)
     {
         buffer.Enqueue(item);
-
         UpdateVisual();
+
         Thread.Sleep(500);
         busy = false;
 

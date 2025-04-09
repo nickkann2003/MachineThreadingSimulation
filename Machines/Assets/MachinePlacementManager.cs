@@ -23,9 +23,20 @@ public class MachinePlacementManager : MonoBehaviour
 
     public void CreateMachine(int gridX, int gridY)
     {
+        System.Random rand = new System.Random();
         GameObject newMachine = newMachine = Instantiate(machinePrefab, machineParentReference); // Instantiate the visual
         newMachine.transform.localPosition = new Vector3(gridX, 0, gridY);                  // Set its world position
         MachineVisualController con = newMachine.GetComponent<MachineVisualController>();   // Grab a reference to the script component
+        if (rand.Next(0, 2) > 2)
+        {
+            con.inputDirection = new Vector2(-1, 0);
+            con.outputDirection = new Vector2(1, 0);
+        }
+        else
+        {
+            con.inputDirection = new Vector2(0, -1);
+            con.outputDirection = new Vector2(0, 1);
+        }
 
         if (first)
         {

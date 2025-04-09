@@ -23,9 +23,14 @@ public class MachineVisualController : MonoBehaviour
     /// <param name="nextMachineInput">Input for the next connected machine, NULL if not there</param>
     public void InitializeMachine(MachineVisualController previousMachineOutput, MachineVisualController nextMachineInput)
     {
+        // Create machine pieces from Factory
         machine = MachineFactory.CreateMachine(machineSO.machineType);
         machineInput = MachineFactory.CreateMachineInput(machineSO.machineInput);
         machineOutput = MachineFactory.CreateMachineOutput(machineSO.machineOutput);
+
+        // Set visual location of pieces
+        inputController.GetComponent<RectTransform>().localPosition = new Vector3(inputDirection.x * 0.4f, inputDirection.y * -0.4f, 0);
+        outputController.GetComponent<RectTransform>().localPosition = new Vector3(outputDirection.x * 0.4f, outputDirection.y * -0.4f, 0);
 
         // Connect internals
         ConnectMachine();
