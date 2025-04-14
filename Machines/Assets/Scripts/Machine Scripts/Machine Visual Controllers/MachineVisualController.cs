@@ -25,12 +25,12 @@ public class MachineVisualController : MonoBehaviour
     {
         // Create machine pieces from Factory
         machine = MachineFactory.CreateMachine(machineSO.machineType);
+
+        // Machine input and output
         machineInput = MachineFactory.CreateMachineInput(machineSO.machineInput);
         machineOutput = MachineFactory.CreateMachineOutput(machineSO.machineOutput);
-
-        // Set visual location of pieces
-        inputController.GetComponent<RectTransform>().localPosition = new Vector3(inputDirection.x * 0.4f, inputDirection.y * -0.4f, 0);
-        outputController.GetComponent<RectTransform>().localPosition = new Vector3(outputDirection.x * 0.4f, outputDirection.y * -0.4f, 0);
+        SetBarPositionAndRotation(inputController, inputDirection);
+        SetBarPositionAndRotation(outputController, outputDirection);
 
         // Connect internals
         ConnectMachine();
@@ -71,11 +71,39 @@ public class MachineVisualController : MonoBehaviour
     }
 
     /// <summary>
+    /// Connect output to another MachineVisualController in a specific direction
+    /// </summary>
+    /// <param name="direction">Direction output is going to</param>
+    /// <param name="other">Other machine to connect to</param>
+    public void ConnectToDirection(Vector2 direction, MachineVisualController other)
+    {
+        SetOutputDirection(direction);
+        other.SetInputDirection(direction * -1);
+        ConnectToNextMachine(other);
+    }
+
+    /// <summary>
     /// Calls notify input to kick off machine processing
     /// </summary>
     public void KickoffFunctionality()
     {
         machine.NotifyInput();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="direction"></param>
+    public void SetInputDirection(Vector2 direction)
+    {
+        inputDirection = direction;
+        SetBarPositionAndRotation(inputController, direction);
+    }
+
+    public void SetOutputDirection(Vector2 direction)
+    {
+        outputDirection = direction;
+        SetBarPositionAndRotation(outputController, direction);
     }
 
     // -------------- Private Functions ----------------
@@ -89,6 +117,21 @@ public class MachineVisualController : MonoBehaviour
         machineInput.SetDisplayReference(inputController);
         machineOutput.SetDisplayReference(outputController);
         machine.SetDisplayReference(machineController);
+    }
+
+    /// <summary>
+    /// Private helper function for setting physical position and rotation of a meter
+    /// </summary>
+    /// <param name="bar">BarVisualController object script</param>
+    /// <param name="direction">Direction it faces</param>
+    private void SetBarPositionAndRotation(BarVisualController bar, Vector2 direction)
+    {
+        RectTransform barTransform = bar.GetComponent<RectTransform>();
+        barTransform.localPosition = new Vector3(direction.x * 0.45f, direction.y * -0.45f, -0.05f);
+        if(direction.y != 0)
+        {
+            barTransform.Rotate(new Vector3(0, 0, 90));
+        }
     }
 
     // -------------------- Unity Functions ---------------------

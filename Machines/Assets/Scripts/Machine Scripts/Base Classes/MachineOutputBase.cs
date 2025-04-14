@@ -10,6 +10,9 @@ public class MachineOutputBase : IMachineOutput
     private int bufferSize = 5;
     private bool busy = false; // Shows if thread is running
 
+    // Whether or not this Output is currently Active
+    public bool active = true;
+
     private IMachine connectedMachine;
     private IMachineInput connectedInput;
     private BarVisualController displayController;
@@ -21,6 +24,10 @@ public class MachineOutputBase : IMachineOutput
     /// <returns>Next output item or null</returns>
     public IProcessable GetNextOutput()
     {
+        // If inactive, return null
+        if (!active)
+            return null;
+
         IProcessable returnedItem = null;
         // If full, dequeue and notify machine
         if (buffer.Count >= bufferSize)
@@ -48,6 +55,10 @@ public class MachineOutputBase : IMachineOutput
     /// <returns>False if unable to add, true if added successfully</returns>
     public bool GiveOutput(IProcessable output)
     {
+        // Return false if not active
+        if (!active)
+            return false;
+
         if (buffer.Contains(output))
         {
             UpdateVisual();
@@ -74,11 +85,13 @@ public class MachineOutputBase : IMachineOutput
     public void SetInputReference(IMachineInput input)
     {
         connectedInput = input;
+        ActiveCheck();
     }
 
     public void SetMachineReference(IMachine machine)
     {
         connectedMachine = machine;
+        ActiveCheck();
     }
 
     public void SetDisplayReference(BarVisualController displayController)
@@ -90,13 +103,6 @@ public class MachineOutputBase : IMachineOutput
     public void Stop()
     {
         // Machine output has no threads to stop
-    }
-
-    // --------------- Public Functions --------------
-    public void SetInputAndMachine(IMachineInput _input, IMachine _machine)
-    {
-        connectedInput = _input;
-        connectedMachine = _machine;
     }
 
     // --------------- Private Functions --------------
@@ -147,6 +153,21 @@ public class MachineOutputBase : IMachineOutput
         if (displayController != null)
         {
             displayController.SetProgress((float)buffer.Count / (float)bufferSize, buffer.Count, bufferSize);
+        }
+    }
+
+    /// <summary>
+    /// Checks if this MachineOutput has valid references and should be active
+    /// </summary>
+    private void ActiveCheck()
+    {
+        if(connectedInput != null && connectedMachine != null)
+        {
+            active = true;
+        }
+        else
+        {
+            active = false;
         }
     }
 

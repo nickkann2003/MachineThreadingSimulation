@@ -10,6 +10,8 @@ public class MachineInputBase : IMachineInput
     private int bufferSize = 5;
     private bool busy = false; // Is thread currently running
 
+    public bool active = false;
+
     private IMachineOutput connectedOutput;
     private IMachine connectedMachine;
     private BarVisualController displayController;
@@ -21,6 +23,10 @@ public class MachineInputBase : IMachineInput
     /// <returns>Next item or null</returns>
     public IProcessable? GetNextInput()
     {
+        // If this input is inactive, return null
+        if (!active)
+            return null;
+
         IProcessable returnedItem = null;
         // If full, dequeue and pull from output
         if (buffer.Count >= bufferSize)
@@ -52,6 +58,10 @@ public class MachineInputBase : IMachineInput
     /// <returns>True if successful, false if not</returns>
     public bool GiveInput(IProcessable input)
     {
+        // If this input is inactive, return false
+        if (!active)
+            return false;
+
         if (buffer.Contains(input))
         {
             UpdateVisual();
@@ -76,11 +86,13 @@ public class MachineInputBase : IMachineInput
     public void SetMachineReference(IMachine machine)
     {
         this.connectedMachine = machine;
+        ActiveCheck();
     }
 
     public void SetOutputReference(IMachineOutput output)
     {
         this.connectedOutput = output;
+        ActiveCheck();
     }
 
     public void SetDisplayReference(BarVisualController displayController)
@@ -148,6 +160,21 @@ public class MachineInputBase : IMachineInput
         if(displayController != null)
         {
             displayController.SetProgress((float)buffer.Count / (float)bufferSize, buffer.Count, bufferSize);
+        }
+    }
+
+    /// <summary>
+    /// Checks if this MachineOutput has valid references and should be active
+    /// </summary>
+    private void ActiveCheck()
+    {
+        if (connectedOutput != null && connectedMachine != null)
+        {
+            active = true;
+        }
+        else
+        {
+            active = false;
         }
     }
 }

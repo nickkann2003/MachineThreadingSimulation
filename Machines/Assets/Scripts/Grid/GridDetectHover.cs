@@ -26,8 +26,9 @@ public class GridDetectHover : MonoBehaviour
     /// <summary>
     /// On mouse down, create a machine at this location
     /// </summary>
-    private void OnMouseDown()
+    public virtual void OnMouseDown()
     {
         MachinePlacementManager.instance.CreateMachine((int)transform.localPosition.x, (int)transform.localPosition.z);
+        GetComponent<Collider>().enabled = false;
     }
 }
