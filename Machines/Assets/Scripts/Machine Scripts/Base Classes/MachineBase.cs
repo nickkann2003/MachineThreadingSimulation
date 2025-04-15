@@ -21,6 +21,7 @@ public class MachineBase : IMachine
     public MachineBase()
     {
         t_Process = new Thread(Process);
+        t_Process.IsBackground = true;
     }
 
     // ------------ Machine Base Functions -----------
@@ -39,6 +40,7 @@ public class MachineBase : IMachine
                 t_Process.Join();
             }
             t_Process = new Thread(Process);
+            t_Process.IsBackground = true;
             done = false;
         }
 
@@ -58,6 +60,7 @@ public class MachineBase : IMachine
                     t_Process.Join();
                     Debug.Log("JOIN SUCCESS, starting new process");
                     t_Process = new Thread(Process);
+                    t_Process.IsBackground = true;
                 }
                 t_Process.Start();
             }

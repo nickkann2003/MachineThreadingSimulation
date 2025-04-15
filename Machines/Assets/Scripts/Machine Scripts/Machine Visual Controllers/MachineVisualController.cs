@@ -50,11 +50,9 @@ public class MachineVisualController : MonoBehaviour
     /// <param name="next">Input for the next connceted machine</param>
     public void ConnectToNextMachine(MachineVisualController next)
     {
-        if (next.outputDirection.Equals(outputDirection))
-        {
-            machineOutput.SetInputReference(next.machineInput);     // Set this to push to next machine
-            next.machineInput.SetOutputReference(machineOutput);    // Set next machine to pull from this
-        }
+        machineOutput.SetInputReference(next.machineInput);     // Set this to push to next machine
+        next.machineInput.SetOutputReference(machineOutput);    // Set next machine to pull from this
+        machine.NotifyOutput();
     }
 
     /// <summary>

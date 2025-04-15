@@ -1,9 +1,19 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridDetectHover : MonoBehaviour
 {
     [SerializeField] private GameObject unhoveredImage;
     [SerializeField] private GameObject hoveredImage;
+    [SerializeField] private List<GameObject> childDetectors = new List<GameObject>();
+
+    private void Start()
+    {
+        foreach(GameObject c in childDetectors)
+        {
+            c.SetActive(false);
+        }
+    }
 
     /// <summary>
     /// When the mouse enters this grid, set to hovered
@@ -30,5 +40,9 @@ public class GridDetectHover : MonoBehaviour
     {
         MachinePlacementManager.instance.CreateMachine((int)transform.localPosition.x, (int)transform.localPosition.z);
         GetComponent<Collider>().enabled = false;
+        foreach(GameObject child in childDetectors)
+        {
+            child.SetActive(true);
+        }
     }
 }
