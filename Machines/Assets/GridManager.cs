@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Threading;
 
 public class GridManager : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class GridManager : MonoBehaviour
 
     private MachineVisualController[][] allMachines;
 
+    private bool creatingGrid = true;
+    private List<System.Tuple<int, int>> readyToMake = new List<System.Tuple<int, int>>();
+
     // -------------- Untiy Functions --------------
     private void Awake()
     {
@@ -21,14 +25,30 @@ public class GridManager : MonoBehaviour
     public void Start()
     {
         allMachines = new MachineVisualController[(int)size.x][];
-        // Loop and create grid of size
-        for(int i = (int)-size.x/2; i < size.x/2f; i++)
+
+        Thread gridCreator = new Thread(ThreadedGridCreation);
+        gridCreator.IsBackground = true;
+        gridCreator.Start();
+    }
+
+    /// <summary>
+    /// Update function, runs every
+    /// </summary>
+    private void Update()
+    {
+        // If creating the grid
+        if (creatingGrid)
         {
-            allMachines[i + (int)size.x/2] = new MachineVisualController[(int)size.y];
-            for(int j = (int)-size.y/2; j < size.y/2; j++)
+            bool looping = true;
+            while (looping)
             {
-                CreateEmptyGrid(i, j);
-                allMachines[i + (int)size.x / 2][j + (int)size.y / 2] = null;
+                if (readyToMake.Count <= 0)
+                {
+                    looping = false;
+                    break;
+                }
+                CreateEmptyGrid(readyToMake[0].Item1, readyToMake[0].Item2);
+                readyToMake.RemoveAt(0);
             }
         }
     }
@@ -151,5 +171,25 @@ public class GridManager : MonoBehaviour
         // This is done by accessing spots in the grid based on the new machines location, its pointing direction, and the grid of machines
         previousMachine = GetPrevious(adjustedX, adjustedY, con.inputDirection);
         nextMachine = GetNext(adjustedX, adjustedY, con.outputDirection);
+    }
+
+    /// <summary>
+    /// Threaded function designed to progressively add tiles to be loaded over time
+    /// Designed to reduce lag time on program startup
+    /// </summary>
+    private void ThreadedGridCreation()
+    {
+        // Loop and create grid of size
+        for (int i = (int)-size.x / 2; i < size.x / 2f; i++)
+        {
+            allMachines[i + (int)size.x / 2] = new MachineVisualController[(int)size.y];
+            for (int j = (int)-size.y / 2; j < size.y / 2; j++)
+            {
+                readyToMake.Add(new System.Tuple<int, int>(i, j));
+                allMachines[i + (int)size.x / 2][j + (int)size.y / 2] = null;
+                Thread.Sleep(2);
+            }
+        }
+        creatingGrid = false;
     }
 }
