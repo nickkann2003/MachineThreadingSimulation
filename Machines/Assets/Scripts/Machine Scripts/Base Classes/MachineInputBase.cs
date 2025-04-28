@@ -171,6 +171,7 @@ public class MachineInputBase : IMachineInput
         if (connectedOutput != null && connectedMachine != null)
         {
             active = true;
+            PullFromOutput();
         }
         else
         {

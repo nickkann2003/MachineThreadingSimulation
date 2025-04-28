@@ -6,17 +6,17 @@ public class InfiniteProducer : MachineBase
     public InfiniteProducer()
     {
         t_Process = new Thread(Process);
+        t_Process.IsBackground = true;
     }
 
     protected override void Process()
     {
         busy = true;
         // Loop this thread for as long as the machine is alive, infinitely giving output to next machine
-        while (true)
+        while (busy)
         {
             IProcessable createdItem = new ItemBase();
             connectedOutput.GiveOutput(createdItem);
-            Debug.Log("Created item");
             Thread.Sleep(4000);
         }
     }

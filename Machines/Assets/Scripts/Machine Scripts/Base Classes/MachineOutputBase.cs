@@ -55,9 +55,6 @@ public class MachineOutputBase : IMachineOutput
     /// <returns>False if unable to add, true if added successfully</returns>
     public bool GiveOutput(IProcessable output)
     {
-        // Return false if not active
-        if (!active)
-            return false;
 
         if (buffer.Contains(output))
         {
@@ -118,13 +115,17 @@ public class MachineOutputBase : IMachineOutput
         Thread.Sleep(500);
         busy = false;
 
-        // After processing, attempt a push to input
-        PushToInput();
-
-        // If more openings available, let the machine know
-        if(slotsUsed < bufferSize)
+        // Perform notifications if this output is active
+        if (active)
         {
-            connectedMachine.NotifyOutput();
+            // After processing, attempt a push to input
+            PushToInput();
+
+            // If more openings available, let the machine know
+            if (slotsUsed < bufferSize)
+            {
+                connectedMachine.NotifyOutput();
+            }
         }
     }
 
@@ -164,6 +165,7 @@ public class MachineOutputBase : IMachineOutput
         if(connectedInput != null && connectedMachine != null)
         {
             active = true;
+            PushToInput();
         }
         else
         {

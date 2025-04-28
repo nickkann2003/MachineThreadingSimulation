@@ -2,12 +2,21 @@ using UnityEngine;
 
 public class MachineVisualController : MonoBehaviour
 {
+    [Header("Machine script references")]
     [SerializeField] private IMachine machine;
     [SerializeField] public IMachineInput machineInput;
     [SerializeField] public IMachineOutput machineOutput;
+
+    [Header("Visual controller references")]
     [SerializeField] public BarVisualController inputController;
     [SerializeField] public BarVisualController outputController;
     [SerializeField] public BarVisualController machineController;
+
+    [Header("Output visual references")]
+    [SerializeField] public GameObject rightOutputVisual;
+    [SerializeField] public GameObject upOutputVisual;
+    [SerializeField] public GameObject leftOutputVisual;
+    [SerializeField] public GameObject downOutputVisual;
 
     // Normalized direction vector, which way is this machine pointing
     [SerializeField] public Vector2 outputDirection;
@@ -52,7 +61,6 @@ public class MachineVisualController : MonoBehaviour
     {
         machineOutput.SetInputReference(next.machineInput);     // Set this to push to next machine
         next.machineInput.SetOutputReference(machineOutput);    // Set next machine to pull from this
-        machine.NotifyOutput();
     }
 
     /// <summary>
@@ -95,13 +103,13 @@ public class MachineVisualController : MonoBehaviour
     public void SetInputDirection(Vector2 direction)
     {
         inputDirection = direction;
-        SetBarPositionAndRotation(inputController, direction);
+        //SetBarPositionAndRotation(inputController, direction);
     }
 
     public void SetOutputDirection(Vector2 direction)
     {
         outputDirection = direction;
-        SetBarPositionAndRotation(outputController, direction);
+        SetOutputVisual(direction);
     }
 
     // -------------- Private Functions ----------------
@@ -124,17 +132,45 @@ public class MachineVisualController : MonoBehaviour
     /// <param name="direction">Direction it faces</param>
     private void SetBarPositionAndRotation(BarVisualController bar, Vector2 direction)
     {
-        RectTransform barTransform = bar.GetComponent<RectTransform>();
-        barTransform.localPosition = new Vector3(direction.x * 0.45f, direction.y * -0.45f, -0.05f);
-        if(direction.y != 0)
-        {
-            barTransform.Rotate(new Vector3(0, 0, 90));
-        }
+        //RectTransform barTransform = bar.GetComponent<RectTransform>();
+        //barTransform.localPosition = new Vector3(direction.x * 0.45f, direction.y * -0.45f, -0.05f);
+        //if(direction.y != 0)
+        //{
+        //    barTransform.Rotate(new Vector3(0, 0, 90));
+        //}
+        // REMOVED, changed to output pipes visuals
+    }
+
+    /// <summary>
+    /// Activates the given output visual based on the direction given
+    /// </summary>
+    /// <param name="direction">Direction of output for this machine</param>
+    private void SetOutputVisual(Vector2 direction)
+    {
+        disableAllOutputVisuals();
+        if (direction.x == 1)
+            upOutputVisual.SetActive(true);
+        if (direction.x == -1)
+            downOutputVisual.SetActive(true);
+        if (direction.y == 1)
+            leftOutputVisual.SetActive(true);
+        if (direction.y == -1)
+            rightOutputVisual.SetActive(true);
+    }
+
+    private void disableAllOutputVisuals()
+    {
+        upOutputVisual.SetActive(false); 
+        downOutputVisual.SetActive(false); 
+        leftOutputVisual.SetActive(false); 
+        rightOutputVisual.SetActive(false);
     }
 
     // -------------------- Unity Functions ---------------------
     private void OnApplicationQuit()
     {
-        
+        machine.Stop();
+        machineInput.Stop();
+        machineOutput.Stop();
     }
 }

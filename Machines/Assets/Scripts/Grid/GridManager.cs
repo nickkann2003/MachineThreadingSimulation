@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Threading;
+using System;
 
 public class GridManager : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class GridManager : MonoBehaviour
     private MachineVisualController[][] allMachines;
 
     private bool creatingGrid = true;
-    private List<System.Tuple<int, int>> readyToMake = new List<System.Tuple<int, int>>();
+    private Queue<System.Tuple<int, int>> readyToMake = new Queue<System.Tuple<int, int>>();
 
     // -------------- Untiy Functions --------------
     private void Awake()
@@ -37,7 +38,7 @@ public class GridManager : MonoBehaviour
     private void Update()
     {
         // If creating the grid
-        if (creatingGrid)
+        if (readyToMake.Count > 0)
         {
             bool looping = true;
             while (looping)
@@ -47,8 +48,11 @@ public class GridManager : MonoBehaviour
                     looping = false;
                     break;
                 }
-                CreateEmptyGrid(readyToMake[0].Item1, readyToMake[0].Item2);
-                readyToMake.RemoveAt(0);
+                else
+                {
+                    Tuple<int, int> t = readyToMake.Dequeue();
+                    CreateEmptyGrid(t.Item1, t.Item2);
+                }
             }
         }
     }
@@ -64,7 +68,7 @@ public class GridManager : MonoBehaviour
     {
         int adjustedX = (int)size.x / 2 + x;
         int adjustedY = (int)size.y / 2 + y;
-        if ((adjustedX > 0 && adjustedX <= allMachines.Length) && (adjustedY > 0 && adjustedY <= allMachines[0].Length))
+        if ((adjustedX >= 0 && adjustedX < allMachines.Length) && (adjustedY >= 0 && adjustedY < allMachines[0].Length))
             allMachines[adjustedX][adjustedY] = con;
 
         //ConnectNeighbors(adjustedX, adjustedY); // Connect new machine to its neighbors
@@ -87,7 +91,9 @@ public class GridManager : MonoBehaviour
         MachineVisualController targetMachine = GetController(x + (int)direction.x, y + (int)direction.y);
 
         if (targetMachine == null || sourceMachine == null)
+        {
             return;
+        }
 
         sourceMachine.ConnectToDirection(direction, targetMachine);
     }
@@ -147,9 +153,9 @@ public class GridManager : MonoBehaviour
     {
         MachineVisualController con = null;
 
-        int adjustedX = (int)size.x / 2 + x;
-        int adjustedY = (int)size.y / 2 + y;
-        if ((adjustedX > 0 && adjustedX <= allMachines.Length) && (adjustedY > 0 && adjustedY <= allMachines[0].Length))
+        int adjustedX = (int)(size.x / 2) + x;
+        int adjustedY = (int)(size.y / 2) + y;
+        if ((adjustedX >= 0 && adjustedX < allMachines.Length) && (adjustedY >= 0 && adjustedY < allMachines[0].Length))
             return allMachines[adjustedX][adjustedY];
 
         return con;
@@ -179,15 +185,14 @@ public class GridManager : MonoBehaviour
     /// </summary>
     private void ThreadedGridCreation()
     {
-        // Loop and create grid of size
-        for (int i = (int)-size.x / 2; i < size.x / 2f; i++)
+        for(int i = 0; i < size.x; i++)
         {
-            allMachines[i + (int)size.x / 2] = new MachineVisualController[(int)size.y];
-            for (int j = (int)-size.y / 2; j < size.y / 2; j++)
+            allMachines[i] = new MachineVisualController[(int)size.y];
+            for(int j = 0; j < size.y; j++)
             {
-                readyToMake.Add(new System.Tuple<int, int>(i, j));
-                allMachines[i + (int)size.x / 2][j + (int)size.y / 2] = null;
+                allMachines[i][j] = null;
                 Thread.Sleep(2);
+                readyToMake.Enqueue(new System.Tuple<int, int>(i - (int)(size.x / 2), j - (int)(size.x / 2)));
             }
         }
         creatingGrid = false;

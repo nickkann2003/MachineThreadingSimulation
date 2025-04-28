@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class GridDetectHover : MonoBehaviour
 {
@@ -20,8 +21,11 @@ public class GridDetectHover : MonoBehaviour
     /// </summary>
     private void OnMouseEnter()
     {
-        unhoveredImage.SetActive(false);
-        hoveredImage.SetActive(true);
+        if (!EventSystem.current.IsPointerOverGameObject())
+        {
+            unhoveredImage.SetActive(false);
+            hoveredImage.SetActive(true);
+        }
     }
 
     /// <summary>
@@ -29,8 +33,11 @@ public class GridDetectHover : MonoBehaviour
     /// </summary>
     private void OnMouseExit()
     {
-        unhoveredImage.SetActive(true);
-        hoveredImage.SetActive(false);
+        if (!EventSystem.current.IsPointerOverGameObject())
+        {
+            unhoveredImage.SetActive(true);
+            hoveredImage.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -38,11 +45,14 @@ public class GridDetectHover : MonoBehaviour
     /// </summary>
     public virtual void OnMouseDown()
     {
-        MachinePlacementManager.instance.CreateMachine((int)transform.localPosition.x, (int)transform.localPosition.z);
-        GetComponent<Collider>().enabled = false;
-        foreach(GameObject child in childDetectors)
+        if (!EventSystem.current.IsPointerOverGameObject())
         {
-            child.SetActive(true);
+            MachinePlacementManager.instance.CreateMachine((int)transform.localPosition.x, (int)transform.localPosition.z);
+            GetComponent<Collider>().enabled = false;
+            foreach(GameObject child in childDetectors)
+            {
+                child.SetActive(true);
+            }
         }
     }
 }

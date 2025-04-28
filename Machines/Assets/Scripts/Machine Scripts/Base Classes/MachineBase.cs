@@ -151,17 +151,20 @@ public class MachineBase : IMachine
     public virtual void NotifyInput()
     {
         Thread t_awakeChecks = new Thread(AwakeChecks);
+        t_awakeChecks.IsBackground = true;
         t_awakeChecks.Start();
     }
 
     public virtual void NotifyOutput()
     {
         Thread t_awakeChecks = new Thread(AwakeChecks);
+        t_awakeChecks.IsBackground = true;
         t_awakeChecks.Start();
     }
 
     public void Stop()
     {
         t_Process.Abort();
+        busy = false;
     }
 }
